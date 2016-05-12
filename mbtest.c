@@ -177,8 +177,8 @@ int main(void)
     /* Find and open a PCIE device (by default ID) */
     if (PCIE_DEFAULT_VENDOR_ID)
         hDev = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
-    if (PCIE_DEFAULT_VENDOR_ID)
-        hDev1 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+1);
+    //    if (PCIE_DEFAULT_VENDOR_ID)
+    //        hDev1 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+1);
     if (PCIE_DEFAULT_VENDOR_ID)
         hDev2 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+2);
 
@@ -188,7 +188,7 @@ int main(void)
     /* Perform necessary cleanup before exiting the program */
     if (hDev)
         DeviceClose(hDev);
-        DeviceClose(hDev1);
+    //        DeviceClose(hDev1);
         DeviceClose(hDev2);
 
     dwStatus = PCIE_LibUninit();
@@ -1517,22 +1517,22 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 
       if(ireadback == 1) {
         if(inew == 1) {
-         dwAddrSpace =2;
-         u32Data = 0xf0000008;
-         dwOffset = 0x28;
-         WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
+	  dwAddrSpace =2; // Control register
+	  u32Data = 0xf0000008; // Ready and hold and 8 bytes in the receiver FIFO before returning "hold" to the transmitter
+	  dwOffset = 0x28; // Mode register
+	  WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
         }
         dwAddrSpace =2;
-        u32Data = 0x20000000;
-        dwOffset = 0x1c;
+        u32Data = 0x20000000; // Init
+        dwOffset = 0x1c; // Receiver status register 1st optical
         WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
         dwAddrSpace =2;
-        u32Data = 0x40000000+nword*4;
+        u32Data = 0x40000000+nword*4; // Start and 0x(nword*4) bytes to be transferred
         dwOffset = 0x1c;
         WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
         dwAddrSpace =2;
         u64Data =0;
-        dwOffset = 0x18;
+        dwOffset = 0x18; // Transmitter status register 1st optical
         WDC_ReadAddr64(hDev, dwAddrSpace, dwOffset, &u64Data);
       	if(iprint==1) printf (" status word before send = %llX \n",u64Data);
       }
@@ -1565,16 +1565,16 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
        ik= nword/2+1;
        if(k == 0) ik = nword/2;
        for (i=0; i<ik; i++) {
-         dwAddrSpace =0;
+         dwAddrSpace =0; // Optical transceiver 1 data (read)
          u64Data =0;
-         dwOffset = 0x0;
+         dwOffset = 0x0; // DMA address register
          WDC_ReadAddr64(hDev, dwAddrSpace, dwOffset, &u64Data);
          read_array[i*2] = u64Data;
          read_array[i*2+1] = u64Data>>32;
        }
        dwAddrSpace =2;
        u64Data =0;
-       dwOffset = 0x18;
+       dwOffset = 0x18; // Transmitter status register 1st optical
        WDC_ReadAddr64(hDev, dwAddrSpace, dwOffset, &u64Data);
        if(iprint ==1 )printf (" status word after read = %llX \n",u64Data);
        for (i=0; i< nword; i++) {
