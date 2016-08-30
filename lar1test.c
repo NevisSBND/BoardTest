@@ -6618,8 +6618,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 //     scanf("%d",&irand);
      icheck=0;
      irand=0;
-     imod_fem = 17;
-     imod_xmit = 10;
+     imod_fem = 9;
+     printf("\nFEM module crate location: %i\n\n", imod_fem);
+     imod_xmit = 1;
+     printf("\nFake XMIT module crate location: %i\n\n", imod_xmit);
+
      if(icheck != 1) {
       printf(" 1 for print event\n");
       scanf("%d",&iprint);
@@ -6659,7 +6662,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
  //
  //
      usleep(10000); // wait for 10ms
-     inpf = fopen("/home/ub/xmit_fpga_fake","r");
+     inpf = fopen("/home/sbnd/fpga/xmit_fpga_fake","r");
      imod=imod_xmit;
      ichip=mb_xmit_conf_add;
      buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -6738,6 +6741,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 //
 //
 //
+
+     char outFileName[256];
+     time_t t = time(NULL);
+     struct tm ltm = *localtime(&t);
+     sprintf(outFileName, "%4i%02i%02i%02i%02i%02i_input_XMIT_fake_data.txt", 
+	     ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec );
+     FILE *outFile = fopen(outFileName, "w");
+
      imod = imod_xmit;
      ichip =3;
      for (ik=0; ik<64; ik++) {
@@ -6749,14 +6760,25 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 //
 //        fake data == channel number
 //
-       fake_data_array[ik+ia*64]= (ik) & 0xfff;
+//       fake_data_array[ik+ia*64]= (ik) & 0xfff;
 //
 //        fake data == sequence number
 //
- //      fake_data_array[ik+ia*64]= (ia) & 0xfff;
+       fake_data_array[ik+ia*64]= (ia) & 0xfff;
+
+       if(ia == 0) fprintf(outFile,"\nChannel %i fake data\n", ik);
+       fprintf(outFile, "\t%4i", fake_data_array[ik+ia*64]);
+       if( ((ia+1)%64) == 0 ) fprintf(outFile,"\n");
 
       }
      }
+
+     fclose(outFile);
+     printf("\nWritten XMIT fake data pattern into file %s\n\n", outFileName);
+
+     // Fake data for ADC must be 12 bit long but fake XMIT is able to store 16 bit
+     // Store 4 12-bit ADC words as 3 16-bit XMIT words
+     // 64 channels * 1024 samples * 12 bit/16 bit = 49152
      for(ik=0; ik< 49152; ik++) {
       ia=ik/3;
       if((ik%3) ==0) fake_array_pack[ik] = fake_data_array[ia*4] + ((fake_data_array[(ia*4)+1] & 0xf) <<12);
@@ -6812,7 +6834,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 //     scanf("%d",&nloop);
      for ( j=0; j<nloop; j++) {
       usleep(10000); // wait for 10ms
-      inpf = fopen("/home/ub/feb_fpga_lar1nd","r");
+      inpf = fopen("/home/sbnd/fpga/feb_fpga_lar1nd","r");
       imod=imod_fem;
       ichip=mb_feb_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -6920,7 +6942,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
        if(ik ==1) {
 
 
-         i = pcie_rec(hDev,0,1,nword,iprint,py);     // init the receiver
+         i = pcie_rec(hDev,0,1,nword,iprint,py);     // init the receiver 
+	 // jcrespo: code reviewed and commented till here (Jul 7,2016)
 
 //         imod=11;
          ichip=3;
@@ -7030,6 +7053,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
        i = pcie_send(hDev, i, k, px);
 
        usleep(5000); //wait for 5 ms
+       printf("Enter any number\n");
        scanf("%d",&ik);
 
 
@@ -7058,6 +7082,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
          i=1;
          k=1;
          i = pcie_send(hDev, i, k, px);
+	 printf("Enter any number\n");
          scanf("%d",&ik);
 
          usleep(10000);
@@ -7102,16 +7127,22 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
           printf(" checksum %x\n", (((read_array[4]>>16) & 0xfff)+((read_array[4] &0xfff) <<12)));
          }
          nread = ((read_array[1]>>16) & 0xfff)+((read_array[1] &0xfff) <<12);
-         if(iprint ==1 )scanf("%d",&ik);
+	 if(iprint ==1 ){
+	   printf("Enter any number\n");
+	   scanf("%d",&ik);
+	 }
          nword = (nread+1)/2;                    // short words
          i = pcie_rec(hDev,0,1,nword,iprint,py);     // init the receiver
 
          imod=imod_fem;
          ichip=mb_feb_pass_add;
-         buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_rdbuf+(0x0<<16);  // read a header
+         buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_rdbuf+(0x0<<16);  // Read neutrino data through controller (slow control path)
          i=1;
          k=1;
          i = pcie_send(hDev, i, k, px);
+
+	 // jcrespo verbose test: read all the words? To do: adjust timesize too
+	 // nword = 64*1024/2;
 
          py = &read_array;
          i = pcie_rec(hDev,0,2,nword,iprint,py);     // read out 2 32 bits words
@@ -7156,6 +7187,9 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
           }
          }
 
+	 // jcrespo verbose test
+	 // icheck = 1;
+
          if(icheck ==1 ){
           if((2*nword) == (64*timesize*3)){
            for (i=0; i<64; i++){
@@ -7181,7 +7215,10 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
           k = is%1000;
           if(k ==0) printf("event %d\n",is);
         }
-        if(iprint == 1) scanf("%d",&ik);
+        if(iprint == 1) {
+	  printf("Enter any number\n");
+	  scanf("%d",&ik);
+	}
        }
 
        imod=0;
@@ -7190,6 +7227,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
        i=1;
        k=1;
        i = pcie_send(hDev, i, k, px);
+       printf("Enter any number\n");
        scanf("%d",&ik);
       }
 
@@ -7200,8 +7238,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
      }
 
      break;
-
-    case 20:
+ 
+   case 20:
      printf(" BNL ADC testing \n");
 //     printf(" enter number of words per packet \n");
 //     scanf("%d",&nsend);
@@ -14703,25 +14741,25 @@ static int pcie_send_1(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff
       printf (" status word before set = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
      }
 */
-     dwAddrSpace =2;
-     u32Data = 0xf0000008;
-     dwOffset = 0x28;
+     dwAddrSpace =2; // Control registers
+     u32Data = 0xf0000008; // Number of bytes in the receiver FIFO before returning "hold" to the transmitter
+     dwOffset = 0x28; // Mode register
      WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
 
      /*initialize the receiver */
      dwAddrSpace =2;
-     u32Data = 0x20000000;
-     dwOffset = 0x1c;
+     u32Data = 0x20000000; // Initialize
+     dwOffset = 0x1c; // Optical receiver 1's status register
      WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
      /* write byte count **/
      dwAddrSpace =2;
-     u32Data = 0x40000000+nword*4;
+     u32Data = 0x40000000+nword*4; // Start: nword*4 is byte count to be transferred
      dwOffset = 0x1c;
      WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
      if(ipr_status ==1) {
       dwAddrSpace =2;
       u64Data =0;
-      dwOffset = 0x18;
+      dwOffset = 0x18; // Optical transmitter 1's status register
       WDC_ReadAddr64(hDev, dwAddrSpace, dwOffset, &u64Data);
       printf (" status word before read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
      }
@@ -14740,7 +14778,7 @@ static int pcie_send_1(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff
       nread = nword/2+1;
       if(nword%2 == 0) nread = nword/2;
       for (j=0; j< nread; j++) {
-       dwAddrSpace =0;
+	dwAddrSpace =0; // Optical transceiver 1
        dwOffset = 0x0;
        u64Data =0xbad;
        WDC_ReadAddr64(hDev,dwAddrSpace, dwOffset, &u64Data);
@@ -14753,9 +14791,9 @@ static int pcie_send_1(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff
 //       *buff_rec++ = 0x0;
       }
       if(ipr_status ==1) {
-       dwAddrSpace =2;
+	dwAddrSpace =2; // Control registers
        u64Data =0;
-       dwOffset = 0x18;
+       dwOffset = 0x18; // Optical transmitter 1's status register
        WDC_ReadAddr64(hDev, dwAddrSpace, dwOffset, &u64Data);
        printf (" status word after read = %x, %x \n",(u64Data>>32), (u64Data &0xffff));
       }
@@ -14781,27 +14819,28 @@ static int pcie_send_1(WDC_DEVICE_HANDLE hDev, int mode, int nword, UINT32 *buff
 */
 /* set up sending DMA starting address */
 
-      dwAddrSpace =2;
-      u32Data = 0x20000000;
-      dwOffset = 0x0;
+      dwAddrSpace =2; // Control registers
+      u32Data = 0x20000000; // Rewritten below. Delete?
+      dwOffset = 0x0; // DMA address register 31 - 0
       u32Data = pDma_rec->Page->pPhysicalAddr & 0xffffffff;
       WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
 
       dwAddrSpace =2;
-      u32Data = 0x20000000;
-      dwOffset = 0x4;
+      u32Data = 0x20000000; // Rewritten below. Delete?
+      dwOffset = 0x4; // DMA address register 63 - 32
       u32Data = (pDma_rec->Page->pPhysicalAddr >> 32) & 0xffffffff;
       WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
 
 /* byte count */
       dwAddrSpace =2;
-      dwOffset = 0x8;
+      dwOffset = 0x8; // DMA data length register in bytes
       u32Data = nread;
       WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
 
 /* write this will start DMA */
       dwAddrSpace =2;
-      dwOffset = 0xc;
+      dwOffset = 0xc; // DMA control register
+      // jcrespo: code reviewed and commented till here (Jul 7, 2016)
       u32Data = 0x00100040;
       WDC_WriteAddr32(hDev, dwAddrSpace, dwOffset, u32Data);
       icomp=0;

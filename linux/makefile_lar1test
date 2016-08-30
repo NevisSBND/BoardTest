@@ -56,8 +56,8 @@ LFLAGS += -lwdapi1021
 # need also thread support for interrupt handling
 LFLAGS += -lpthread
 
-TARGET = mbtest
-SRCS = ../mbtest.c ../pcie_lib.c $(WD_BASEDIR)/samples/shared/diag_lib.c $(WD_BASEDIR)/samples/shared/wdc_diag_lib.c
+TARGET = lar1test
+SRCS = ../$(TARGET).c ../pcie_lib.c $(WD_BASEDIR)/samples/shared/diag_lib.c $(WD_BASEDIR)/samples/shared/wdc_diag_lib.c
 
 LD = gcc
 
@@ -70,7 +70,7 @@ all : $(TARGET)
 $(TARGET) : $(OBJS)
 	$(LD) $(LFLAGS) -o $@ $(OBJS) $(ADDITIONAL_LIBS) 
 
-mbtest.o : ../mbtest.c
+$(TARGET).o : ../$(TARGET).c
 	$(CC) -c $(CFLAGS) -o $@ $< 
 
 pcie_lib.o : ../pcie_lib.c
