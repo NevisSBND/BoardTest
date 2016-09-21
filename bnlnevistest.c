@@ -149,49 +149,49 @@ int main(void)
   printf("\nStart time of program: %ld sec %ld usec\n",seconds,useconds);
 
 
-    WDC_DEVICE_HANDLE hDev = NULL;
-    WDC_DEVICE_HANDLE hDev1 = NULL;
-    WDC_DEVICE_HANDLE hDev2 = NULL;
+  WDC_DEVICE_HANDLE hDev = NULL;
+  WDC_DEVICE_HANDLE hDev1 = NULL;
+  WDC_DEVICE_HANDLE hDev2 = NULL;
+  
+  DWORD dwStatus;
+  
+  printf("\n");
+  printf("PCIE diagnostic utility.\n");
+  printf("Application accesses hardware using " WD_PROD_NAME ".\n");
 
-    DWORD dwStatus;
-
-    printf("\n");
-    printf("PCIE diagnostic utility.\n");
-    printf("Application accesses hardware using " WD_PROD_NAME ".\n");
-
-    /* Initialize the PCIE library */
-    dwStatus = PCIE_LibInit();
-    if (WD_STATUS_SUCCESS != dwStatus)
+  /* Initialize the PCIE library */
+  dwStatus = PCIE_LibInit();
+  if (WD_STATUS_SUCCESS != dwStatus)
     {
-        PCIE_ERR("pcie_diag: Failed to initialize the PCIE library: %s",
-            PCIE_GetLastErr());
-        return dwStatus;
+      PCIE_ERR("pcie_diag: Failed to initialize the PCIE library: %s",
+	       PCIE_GetLastErr());
+      return dwStatus;
     }
-
-    /* Find and open a PCIE device (by default ID) */
-    if (PCIE_DEFAULT_VENDOR_ID)
-        hDev = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
-    if (PCIE_DEFAULT_VENDOR_ID)
-        hDev1 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+1);
-    if (PCIE_DEFAULT_VENDOR_ID)
-        hDev2 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+2);
-
-    // Go directly to mbtest
-    MenuMBtest(hDev, hDev2);
-
-    /* Perform necessary cleanup before exiting the program */
-    if (hDev)
-        DeviceClose(hDev);
-    if (hDev1)
-        DeviceClose(hDev1);
-    if (hDev2)
-        DeviceClose(hDev2);
-
-    dwStatus = PCIE_LibUninit();
-    if (WD_STATUS_SUCCESS != dwStatus)
-        PCIE_ERR("pcie_diag: Failed to uninit the PCIE library: %s", PCIE_GetLastErr());
-    
-    return dwStatus;
+  
+  /* Find and open a PCIE device (by default ID) */
+  if (PCIE_DEFAULT_VENDOR_ID)
+    hDev = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
+  if (PCIE_DEFAULT_VENDOR_ID)
+    hDev1 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+1);
+  if (PCIE_DEFAULT_VENDOR_ID)
+    hDev2 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+2);
+  
+  // Go directly to mbtest
+  MenuMBtest(hDev, hDev2);
+  
+  /* Perform necessary cleanup before exiting the program */
+  if (hDev)
+    DeviceClose(hDev);
+  if (hDev1)
+    DeviceClose(hDev1);
+  if (hDev2)
+    DeviceClose(hDev2);
+  
+  dwStatus = PCIE_LibUninit();
+  if (WD_STATUS_SUCCESS != dwStatus)
+    PCIE_ERR("pcie_diag: Failed to uninit the PCIE library: %s", PCIE_GetLastErr());
+  
+  return dwStatus;
 }
 
 /* -----------------------------------------------
@@ -401,7 +401,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 #define part_status_read 20
 #define part_source_id 25
 
-
 #define  t1_tr_bar 0
 #define  t2_tr_bar 4
 #define  cs_bar 2
@@ -459,7 +458,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 #define  mb_feb_lst_off         0
 #define  mb_feb_rxreset         2
 #define  mb_feb_align           3
-
 
 #define  mb_feb_adc_align       1
 #define  mb_feb_a_nocomp        2
@@ -713,7 +711,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     tim.tv_nsec =128000;
 //    tim.tv_nsec =172000;
 
-
     PVOID pbuf_rec;
     WD_DMA *pDma_rec;
     DWORD dwOptions_send = DMA_TO_DEVICE | DMA_ALLOW_CACHE;
@@ -725,9 +722,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     UINT32 *px, *py, *py1;
 
     FILE *outf,*inpf;
-    
-
-
 
     nread = 4096*2+6; /*16384 32768, 65536+4;  number of byte to be readout */
     ifr=0;
@@ -736,7 +730,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     icheck =0;
     istop=0;
 
-    // Based on case 19 of MenuMBtest of la1test.c
+    // Based on case 19 of MenuMBtest of lar1test.c
     printf("\n******************************************\n");
     printf("\t\tBNL-Nevis joint test\t\t");
     printf("\n******************************************\n");
@@ -762,7 +756,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     printf("\nTrigger delay: %d\n", itrig_delay);
     printf("number of triggers per loop \n");
      //     scanf("%d",&itrig);
-    itrig = 10;
+    itrig = 1;
     printf("\nNumber of triggers per loop: %d\n", itrig);
     printf(" 1 for checking the event \n");
     //     scanf("%d",&icheck);
@@ -779,13 +773,15 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     printf("\nTrigger module crate location: %i\n\n", imod_trig);
     
     if(icheck != 1) {
-      printf(" 1 for print event\n");
-      scanf("%d",&iprint);
+      //printf(" 1 for print event\n");
+      //scanf("%d",&iprint);
+      iprint = 1;
+      printf("\nPrinting events: %d\n", iprint);   
     }
     else iprint =0;
     printf(" number event \n");
     //     scanf("%d",&nevent);
-    nevent = 1;
+    nevent = 10;
     printf("\nNumber of events: %d\n", nevent);   
 
     //     printf(" enter number of words per packet \n");
@@ -812,7 +808,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 
     printf("\n\tController: Enabled offline run\n");
     int aux;
-    scanf("%d", &aux);
+    //scanf("%d", &aux);
     
     /*
     //disable the run command
@@ -832,7 +828,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     i = pcie_send(hDev, i, k, px);
 
     printf("\n\tDisabled run command from trig board\n");
-    scanf("%d", &aux);
+    //scanf("%d", &aux);
 
     //set offline test off
     imod=0;
@@ -843,7 +839,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     i = pcie_send(hDev, i, k, px);
 
     printf("\n\tController: set test off\n");
-    scanf("%d", &aux);
+    //scanf("%d", &aux);
 
     //set the trigger board deadtime size
     imod=imod_trig;
@@ -860,7 +856,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     i=pcie_send(hDev,i,k,px);
 
     printf("\n\tEnabled external trigger mask\n");
-    scanf("%d", &aux);
+    //scanf("%d", &aux);
 
     //kaleko 013013
     //set calibration delay.  number has to be smaller than frame size
@@ -871,11 +867,20 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     k=1;
     i=pcie_send(hDev,i,k,px);
 
+    // Get current time to name output files
+    char outDate[256];
+    time_t t = time(NULL);
+    struct tm ltm = *localtime(&t);
+    sprintf(outDate, "%4i%02i%02i%02i%02i%02i", 
+	    ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec );
+
+    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // Beginning of fake XMIT block
     //
     // Boot fake XMIT
     //
     printf("\n\tBeginning of fake XMIT booting...\n");
-    scanf("%d", &aux);
+    //scanf("%d", &aux);
     usleep(10000); // wait for 10ms
     inpf = fopen("/home/sbnd/fpga/xmit_fpga_fake","r");
     imod=imod_xmit;
@@ -888,7 +893,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     //          ik= i%2;
     //          dummy1= (ik+i)*(ik+i);
     //      }
-
     
     /* read data as characters (28941) */
     usleep(1000);   // wait fior a while
@@ -951,18 +955,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
      }
     usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
     fclose(inpf);
-    printf(" finish boot xmit_fake type 1 for continue \n");
-    scanf("%d",&i);
+    //printf(" finish boot xmit_fake type 1 for continue \n");
+    //scanf("%d",&i);
+    printf("\n\tFinished fake XMIT booting...\n");
 //
 //
 //
-    
-    char outDate[256];
+
     char outFileName[256];
-    time_t t = time(NULL);
-    struct tm ltm = *localtime(&t);
-    sprintf(outDate, "%4i%02i%02i%02i%02i%02i", 
-	    ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec );
     sprintf(outFileName, "%s_input_XMIT_fake_data.txt", outDate);
     FILE *outFile = fopen(outFileName, "w");
 
@@ -987,7 +987,6 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 	if(ia == 0) fprintf(outFile,"\nChannel %i fake data\n", ik);
 	fprintf(outFile, "\t%4i", fake_data_array[ik+ia*64]);
 	if( ((ia+1)%64) == 0 ) fprintf(outFile,"\n");
-	
       }
     }
 
@@ -1005,14 +1004,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     }
 
     printf("\n\tLoad fake data to XMIT...\n");
-    scanf("%d", &aux);
-    for (ik=0; ik<4; ik++) {
+    //scanf("%d", &aux);
+    for(ik=0; ik<4; ik++){
       buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_block)+((ik & 0xffff)<<16); //write data
       i=1;
       k=1;
       i = pcie_send(hDev, i, k, px);
       usleep(1);
-      for (ijk=0; ijk<49152; ijk++) {
+      for(ijk=0; ijk<49152; ijk++){
 	buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_w_addr)+(((ijk) & 0xffff)<<16); //write address
 	i=1;
 	k=1;
@@ -1035,9 +1034,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 	if(i==0) printf(" ik= %d,loop %d\n",ik,ijk);
       }
     }
-    printf(" finish loading test pattern, type 1 for continue \n");
-    scanf("%d",&i);
-    
+    //printf(" finish loading test pattern, type 1 for continue \n");
+    //scanf("%d",&i);
+    printf("\n\tFinished loading fake data to XMIT...\n");    
+    // End of fake XMIT block
+    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
     //
     // Boot FEM
@@ -1053,10 +1054,10 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 
     //     printf(" enable number of loop\n");
     //     scanf("%d",&nloop);
-    for ( j=0; j<nloop; j++) {
+    for(j=0; j<nloop; j++){
 
       printf("\n\tBeginning of FEM FPGA configuration...\n");
-      scanf("%d", &aux);
+      //scanf("%d", &aux);
       usleep(10000); // wait for 10ms
       inpf = fopen("/home/sbnd/fpga/feb_fpga_lar1nd","r");
       imod=imod_fem;
@@ -1069,8 +1070,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
       //          ik= i%2;
       //          dummy1= (ik+i)*(ik+i);
       //      }
-      
-      
+            
       /* read data as characters (28941) */
       usleep(1000);   // wait fior a while
       count = 0;
@@ -1129,222 +1129,212 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 	nword =ik+1;
 	i=1;
 	i = pcie_send(hDev, i, nword, px);
-	usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
-	fclose(inpf);
-	printf(" enter 1 to reset the dram \n");
-	scanf("%d",&ik);
-	//      ik =1;
-	if(ik ==1) {
-	  imod=imod_fem;
-	  ichip=3;
-	  buf_send[0]=(imod<<11)+(ichip<<8)+31+(0x1<<16);  // turm the DRAM reset on
-	  i=1;
-	  k=1;
-	  i = pcie_send(hDev, i, k, px);
-	  //
-	  ichip=3;
-	  buf_send[0]=(imod<<11)+(ichip<<8)+31+(0x0<<16);  // turm the DRAM reset off
-	  i=1;
-	  k=1;
-	  i = pcie_send(hDev, i, k, px);
-	  
-	  usleep(5000);    // wait for 5 ms for DRAM to be initialized
-	  
-	  //         imod=11;
-	  ichip=3;
-	  buf_send[0]=(imod<<11)+(ichip<<8)+6+(imod<<16);  // set module number
-	  i=1;
-	  k=1;
-	  i = pcie_send(hDev, i, k, px);
-	  	  
-	}
-	//       printf(" enter 1 to read system status \n");
-	//       scanf("%d",&ik);
-	ik=1;
-	nword =1;
-	if(ik ==1) {
-	  
-	  
-	  i = pcie_rec(hDev,0,1,nword,iprint,py);     // init the receiver 
-	  
-	  //         imod=11;
-	  ichip=3;
-	  buf_send[0]=(imod<<11)+(ichip<<8)+20+(0x0<<16);  // read out FEM status
-	  i=1;
-	  k=1;
-	  i = pcie_send(hDev, i, k, px);
-	  py = &read_array;
-	  i = pcie_rec(hDev,0,2,nword,iprint,py);     // read out 2 32 bits words
-	  printf("receive data word = %x, %x \n", read_array[0], read_array[1]);
 
-	  
-	  // From MicroBooNE FPGA -- can differ for SBND
-	  printf("receive data word -- after reset = %x, %x \n", read_array[0], read_array[1]);
-	  printf(" module = %d, command = %d \n", ((read_array[0]>>11) & 0x1f), (read_array[0] &0xff));
-	  printf(" ADC right dpa lock     %d \n", ((read_array[0]>>17) & 0x1));
-	  printf(" ADC left  dpa lock     %d \n", ((read_array[0]>>18) & 0x1));
-	  printf(" block error 2          %d \n", ((read_array[0]>>19) & 0x1));
-	  printf(" block error 1          %d \n", ((read_array[0]>>20) & 0x1));
-	  printf(" pll lcoked             %d \n", ((read_array[0]>>21) & 0x1));
-	  printf(" superNova mem ready    %d \n", ((read_array[0]>>22) & 0x1));
-	  printf(" beam      mem ready    %d \n", ((read_array[0]>>23) & 0x1));
-	  printf(" ADC right PLL locked   %d \n", ((read_array[0]>>24) & 0x1));
-	  printf(" ADC left PLL locked    %d \n", ((read_array[0]>>25) & 0x1));
-	  printf(" ADC align cmd right    %d \n", ((read_array[0]>>26) & 0x1));
-	  printf(" ADC align cmd left     %d \n", ((read_array[0]>>27) & 0x1));
-	  printf(" ADC align done right   %d \n", ((read_array[0]>>28) & 0x1));
-	  printf(" ADC align done left    %d \n", ((read_array[0]>>29) & 0x1));
-	  printf(" Neutrino data empty    %d \n", ((read_array[0]>>30) & 0x1));
-	  printf(" Neutrino Header empty  %d \n", ((read_array[0]>>31) & 0x1));
-	  
+      }
+      usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
+      fclose(inpf);
+      //printf(" enter 1 to reset the dram \n");
+      //scanf("%d",&ik);
+      ik =1;
+      printf("\n\tResetting the DRAM...\n");
+      if(ik ==1) {
+	imod=imod_fem;
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+31+(0x1<<16);  // turm the DRAM reset on
+	i=1;
+	k=1;
+	i = pcie_send(hDev, i, k, px);
+	//
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+31+(0x0<<16);  // turm the DRAM reset off
+	i=1;
+	k=1;
+	i = pcie_send(hDev, i, k, px);
+	
+	usleep(5000);    // wait for 5 ms for DRAM to be initialized
+	
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+6+(imod<<16);  // set module number
+	i=1;
+	k=1;
+	i = pcie_send(hDev, i, k, px);
+      }
+      //       printf(" enter 1 to read system status \n");
+      //       scanf("%d",&ik);
+      ik=1;
+      nword =1;
+      if(ik == 1){
+	i = pcie_rec(hDev,0,1,nword,iprint,py);     // init the receiver 
+	
+	imod=imod_fem;
+	ichip=3;
+	buf_send[0]=(imod<<11)+(ichip<<8)+20+(0x0<<16);  // read out FEM status
+	i=1;
+	k=1;
+	i = pcie_send(hDev, i, k, px);
+	py = &read_array;
+	i = pcie_rec(hDev,0,2,nword,iprint,py);     // read out 2 32 bits words
+	printf("receive data word = %x, %x \n", read_array[0], read_array[1]);
+	
+	// From MicroBooNE FPGA -- can differ for SBND
+	printf("receive data word -- after reset = %x, %x \n", read_array[0], read_array[1]);
+	printf(" module = %d, command = %d \n", ((read_array[0]>>11) & 0x1f), (read_array[0] &0xff));
+	printf(" ADC right dpa lock     %d \n", ((read_array[0]>>17) & 0x1));
+	printf(" ADC left  dpa lock     %d \n", ((read_array[0]>>18) & 0x1));
+	printf(" block error 2          %d \n", ((read_array[0]>>19) & 0x1));
+	printf(" block error 1          %d \n", ((read_array[0]>>20) & 0x1));
+	printf(" pll lcoked             %d \n", ((read_array[0]>>21) & 0x1));
+	printf(" superNova mem ready    %d \n", ((read_array[0]>>22) & 0x1));
+	printf(" beam      mem ready    %d \n", ((read_array[0]>>23) & 0x1));
+	printf(" ADC right PLL locked   %d \n", ((read_array[0]>>24) & 0x1));
+	printf(" ADC left PLL locked    %d \n", ((read_array[0]>>25) & 0x1));
+	printf(" ADC align cmd right    %d \n", ((read_array[0]>>26) & 0x1));
+	printf(" ADC align cmd left     %d \n", ((read_array[0]>>27) & 0x1));
+	printf(" ADC align done right   %d \n", ((read_array[0]>>28) & 0x1));
+	printf(" ADC align done left    %d \n", ((read_array[0]>>29) & 0x1));
+	printf(" Neutrino data empty    %d \n", ((read_array[0]>>30) & 0x1));
+	printf(" Neutrino Header empty  %d \n", ((read_array[0]>>31) & 0x1));
+      }
+      
+      //       printf(" enter L1 trigger delay \n");
+      //       scanf("%d",&itrig_delay);
+      //       itrig_delay = 51;
+      nword =1;
+      //
+      // set to use test generator 2, set test =2
+      //
+      //       imod=11;
+      /*
+	ichip=mb_feb_pass_add;
+	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_test_source+(0x2<<16);  // set test source to 2
+	i=1;
+	k=1;
+	i = pcie_send(hDev, i, k, px);
+      */
+      //
+      // set frame set to be 1023 --- there will be 1024/8 = 128 adc samples.
+      //
+      
+      /*
+	imod=0;
+	ichip=1;
+	//       iframe= 255;    //1023
+	iframe = iframe_length-1;
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_frame)+((iframe & 0xffff)<<16); // set offline frame size
+	i=1;
+	k=1;
+	i = pcie_send(hDev, i, k, px);
+      */
+      
+      //Set number of ADC samples to (iframe+1)/8; eg, 1024 gives 128 adc samples per frame
+      imod=imod_trig;
+      //iframe= 1023;    //1023
+      iframe= iframe_length - 1;
+      buf_send[0]=(imod<<11)+(mb_trig_frame_size)+((iframe & 0xffff)<<16); //set up frame size.
+      i=1;
+      k=1;
+      i = pcie_send(hDev, i, k, px);
+      
+      //
+      // load trig 1 position relative to the frame..
+      //
+      /*
+	imod=0;
+	ichip=1;
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_trig_pos)+((itrig_delay & 0xffff)<<16); // set offline trigger 1 position within the frame
+	i=1;
+	k=1;
+	i = pcie_send(hDev, i, k, px);
+      */
+      //
+      //    start loading the test 2 data memory
+      //
+      imod =imod_fem;
+      /*
+	ichip=3;
+	for (is=0; is<64; is++) {
+	ik = 0x4000+is;                        // load channel address
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((ik & 0xffff)<<16); //enable test mode
+	i = pcie_send(hDev, 1, 1, px);
+	ibase = 32*is;
+	il = is%8;
+	if(il == 0) printf(" loading channel %d\n",is);
+	for (ik=0; ik< 256; ik++) {                 // loop over all possible address
+	if(irand ==1) ijk = rand() & 0xfff ;        // use random number
+	else ijk= (ibase+ik*8) & 0xfff;
+	k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); //enable test mode
+	i = pcie_send(hDev, 1, 1, px);
+	send_array[is*256+ik]=ijk;           //load up data map
 	}
-	
-	
-	//       printf(" enter L1 trigger delay \n");
-	//       scanf("%d",&itrig_delay);
-	//       itrig_delay = 51;
-	nword =1;
-	//
-	// set to use test generator 2, set test =2
-	//
-	//       imod=11;
-	/*
-	  ichip=mb_feb_pass_add;
-	  buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_test_source+(0x2<<16);  // set test source to 2
-	  i=1;
-	  k=1;
-	  i = pcie_send(hDev, i, k, px);
-	*/
-	//
-	// set frame set to be 1023 --- there will be 1024/8 = 128 adc samples.
-	//
-	
-	/*
-	  imod=0;
-	  ichip=1;
-	  //       iframe= 255;    //1023
-	  iframe = iframe_length-1;
-	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_frame)+((iframe & 0xffff)<<16); // set offline frame size
-	  i=1;
-	  k=1;
-	  i = pcie_send(hDev, i, k, px);
-	*/
-	
-	//Set number of ADC samples to (iframe+1)/8; eg, 1024 gives 128 adc samples per frame
-	imod=imod_trig;
-	//iframe= 1023;    //1023
-	iframe= iframe_length - 1;
-	buf_send[0]=(imod<<11)+(mb_trig_frame_size)+((iframe & 0xffff)<<16); //set up frame size.
+	}
+      */
+      
+      ichip=3;
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_nocomp+(0x1<<16);  // set a channel (neutrino) no compression
+      i=1;
+      k=1;
+      i = pcie_send(hDev, i, k, px);
+      
+      //       timesize =4;
+      timesize = idrift_time;
+      ichip=3;
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_timesize+(timesize<<16);  // set drift time size (in units of 2MHz ADC samples)
+      i=1;
+      k=1;
+      i = pcie_send(hDev, i, k, px);
+      
+      a_id =0x20;
+      ichip=3;
+      buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_id+(a_id<<16);  // set a_id // set neutrino data stream ID to appear in output data header
+      i=1;
+      k=1;
+      i = pcie_send(hDev, i, k, px);
+      
+      imod= imod_fem;
+      ichip=3;
+      buf_send[0]=(imod<<11)+(ichip<<8)+10+(0x1<<16);    // enable a test n // test point mode
+      i=1;
+      k=1;
+      i = pcie_send(hDev, i, k, px);
+      /*
+	imod=0;
+	ichip=1;
+	buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_on)+(0x0<<16); //enable offline run on
 	i=1;
 	k=1;
 	i = pcie_send(hDev, i, k, px);
 	
-	//
-	// load trig 1 position relative to the frame..
-	//
-	/*
-	  imod=0;
-	  ichip=1;
-	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_load_trig_pos)+((itrig_delay & 0xffff)<<16); // set offline trigger 1 position within the frame
-	  i=1;
-	  k=1;
-	  i = pcie_send(hDev, i, k, px);
-	*/
-	//
-	//    start loading the test 2 data memory
-	//
-	imod =imod_fem;
-	/*
-	  ichip=3;
-	  for (is=0; is<64; is++) {
-	  ik = 0x4000+is;                        // load channel address
-	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((ik & 0xffff)<<16); //enable test mode
-	  i = pcie_send(hDev, 1, 1, px);
-	  ibase = 32*is;
-	  il = is%8;
-	  if(il == 0) printf(" loading channel %d\n",is);
-	  for (ik=0; ik< 256; ik++) {                 // loop over all possible address
-	  if(irand ==1) ijk = rand() & 0xfff ;        // use random number
-	  else ijk= (ibase+ik*8) & 0xfff;
-	  k = 0x8000+ ijk;        // make sure bit 15-12 is clear for the data
-	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_feb_test_ram_data)+((k & 0xffff)<<16); //enable test mode
-	  i = pcie_send(hDev, 1, 1, px);
-	  send_array[is*256+ik]=ijk;           //load up data map
-	  }
-	  }
-	*/
-	
-	//       imod=11;
-	ichip=3;
-	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_nocomp+(0x1<<16);  // set a channel (neutrino) no compression
-	i=1;
-	k=1;
-	i = pcie_send(hDev, i, k, px);
-	
-	//       timesize =4;
-	timesize = idrift_time;
-	//       imod=11;
-	ichip=3;
-	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_timesize+(timesize<<16);  // set drift time size (in units of 2MHz ADC samples)
-	i=1;
-	k=1;
-	i = pcie_send(hDev, i, k, px);
-	
-	a_id =0x20;
-	//       imod=11;
-	ichip=3;
-	buf_send[0]=(imod<<11)+(ichip<<8)+mb_feb_a_id+(a_id<<16);  // set a_id // set neutrino data stream ID to appear in output data header
-	i=1;
-	k=1;
-	i = pcie_send(hDev, i, k, px);
-	
-	
-	//       imod=11;    enable test on to get slow control       //tempory
-	imod= imod_fem;
-	ichip=3;
-	buf_send[0]=(imod<<11)+(ichip<<8)+10+(0x1<<16);    // enable a test n // test point mode
-	i=1;
-	k=1;
-	i = pcie_send(hDev, i, k, px);
-	/*
-	  imod=0;
-	  ichip=1;
-	  buf_send[0]=(imod<<11)+(ichip<<8)+(mb_cntrl_set_run_on)+(0x0<<16); //enable offline run on
-	  i=1;
-	  k=1;
-	  i = pcie_send(hDev, i, k, px);
-	  
-	  usleep(5000); //wait for 5 ms
-	*/
-	
-	//Set trigger run
-	imod=imod_trig;
-	buf_send[0]=(imod<<11)+(mb_trig_run)+((0x1)<<16); //set up run
-	i=1;
-	k=1;
-	i = pcie_send(hDev, i, k, px);
-
-	printf("Just set up the trigger run ...\n");
 	usleep(5000); //wait for 5 ms
+      */
+      
+      //Set trigger run
+      imod=imod_trig;
+      buf_send[0]=(imod<<11)+(mb_trig_run)+((0x1)<<16); //set up run
+      i=1;
+      k=1;
+      i = pcie_send(hDev, i, k, px);
+      
+      printf("Just set up the trigger run ...\n");
+      usleep(5000); //wait for 5 ms
+      
+      //printf("Enter any number\n");
+      //scanf("%d",&ik);
 
-	
-	
-	printf("Enter any number\n");
-	scanf("%d",&ik);
-	
-	
-	for (is=0; is<nevent; is++) {
-
-	  
-	  //
-	  //     send out multiple triggers
-	  //
-	  /*
-	    for (ijtrig=0; ijtrig<itrig; ijtrig++) {
-	    printf(" itrig %d, itrig_delay %d\n", ijtrig,itrig_delay);
-	    imod=0;
-	    ichip=1;
-	    buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger // offline trig 1 armed
+      char outBinFileName[256];
+      sprintf(outBinFileName, "%s_output.dat", outDate);
+      FILE* outBinFile = creat(outBinFileName,0755);
+      
+      for(is=0; is<nevent; is++){
+	//
+	//     send out multiple triggers
+	//
+	/*
+	  for (ijtrig=0; ijtrig<itrig; ijtrig++) {
+	  printf(" itrig %d, itrig_delay %d\n", ijtrig,itrig_delay);
+	  imod=0;
+	  ichip=1;
+	  buf_send[0]=(imod<<11)+(ichip<<8)+mb_cntrl_set_trig1+(0x0<<16);  // send trigger // offline trig 1 armed
 	    i=1;
 	    k=1;
 	    i = pcie_send(hDev, i, k, px);
@@ -1367,7 +1357,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 	    }
 	  */
 
-	  for (ijtrig=0; ijtrig<itrig; ijtrig++) {//jcrespo
+	  for (ijtrig=0; ijtrig<itrig; ijtrig++) {//jcrespo: multiple triggers
 	    //kaleko 013013 changing mb_trig_pctrig to mb_trig_calib
 	    imod =imod_trig;  /* trigger module */
 	    //buf_send[0]=(imod<<11)+mb_trig_pctrig+((0x0)<<16);
@@ -1380,17 +1370,14 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 	    //	      printf("Sent trigger number %i to generate event.  Continuing...\n",is+1);
 	    //kaleko pause between each events... have user enter a dummy variable
 	    //scanf("%i",&waitflag);
-	    printf("Enter any number\n");
-	    scanf("%d",&ik);
+	    //printf("Enter any number\n");
+	    //scanf("%d",&ik);
 	    
 	    usleep(10000);
 	    
-	  }
-
-
+	  }//jcrespo: end of multiple triggers
 
 	  //      set module number again to enable the FEB module read back
-	  
 	  imod=imod_fem;
 	  ichip=3;
 	  buf_send[0]=(imod<<11)+(ichip<<8)+6+(imod<<16);  // set user-defined module number to appear in output data header
@@ -1424,10 +1411,15 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 	    printf(" frame number %d\n", (((read_array[3]>>16) & 0xfff)+((read_array[3] &0xfff) <<12)));
 	    printf(" checksum %x\n", (((read_array[4]>>16) & 0xfff)+((read_array[4] &0xfff) <<12)));
 	  }
+
+	  int nwrite_1 = write(outBinFile, read_array, 6*sizeof(read_array[0]));
+	  printf("\n\n\n\n\t %d header bytes written to %s \n\n\n\n", nwrite_1, outBinFileName);
+
+
 	  nread = ((read_array[1]>>16) & 0xfff)+((read_array[1] &0xfff) <<12);
 	  if(iprint ==1 ){
-	    printf("Enter any number\n");
-	    scanf("%d",&ik);
+	    //printf("Enter any number\n");
+	    //scanf("%d",&ik);
 	  }
 	  nword = (nread+1)/2;                    // short words
 	  i = pcie_rec(hDev,0,1,nword,iprint,py);     // init the receiver
@@ -1457,12 +1449,12 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 	  
 	  ik=0;
 	  
-	  char outBinFileName[256];
-	  sprintf(outBinFileName, "%s_output.dat", outDate);
-	  FILE* outBinFile = creat(outBinFileName,0755);
-	  int nwrite_2 = write(outBinFile, read_array, sizeof(read_array)/sizeof(read_array[0]));
+	  //char outBinFileName[256];
+	  //sprintf(outBinFileName, "%s_output.dat", outDate);
+	  //FILE* outBinFile = creat(outBinFileName,0755);
+	  int nwrite_2 = write(outBinFile, read_array, nword*sizeof(read_array[0]));
 	  printf("\n\n\n\n\t %d bytes written to %s \n\n\n\n", nwrite_2, outBinFileName);
-	  close(outBinFile);
+
 	  	  
 	 // Sort words
 	  for (i=0; i< nword; i++) {
@@ -1525,8 +1517,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 	    if(k ==0) printf("event %d\n",is);
 	  }
 	  if(iprint == 1) {
-	    printf("Enter any number\n");
-	    scanf("%d",&ik);
+	    //printf("Enter any number\n");
+	    //scanf("%d",&ik);
 	  }
 	}
 	
@@ -1536,9 +1528,10 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 	i=1;
 	k=1;
 	i = pcie_send(hDev, i, k, px);
-	printf("Enter any number\n");
-	scanf("%d",&ik);
-      }
+	//printf("Enter any number\n");
+	//scanf("%d",&ik);
+
+	close(outBinFile);
     }
 } // end of MenuMBtest
 
