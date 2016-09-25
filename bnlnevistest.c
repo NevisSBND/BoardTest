@@ -781,7 +781,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     else iprint =0;
     printf(" number event \n");
     //     scanf("%d",&nevent);
-    nevent = 10;
+    nevent = 100;
     printf("\nNumber of events: %d\n", nevent);   
 
     //     printf(" enter number of words per packet \n");
@@ -874,171 +874,180 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     sprintf(outDate, "%4i%02i%02i%02i%02i%02i", 
 	    ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec );
 
-    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    // Beginning of fake XMIT block
-    //
-    // Boot fake XMIT
-    //
-    printf("\n\tBeginning of fake XMIT booting...\n");
-    //scanf("%d", &aux);
-    usleep(10000); // wait for 10ms
-    inpf = fopen("/home/sbnd/fpga/xmit_fpga_fake","r");
-    imod=imod_xmit;
-    ichip=mb_xmit_conf_add;
-    buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
-    i=1;
-    k=1;
-    i = pcie_send(hDev, i, k, px);
-    //      for (i=0; i<100000; i++) {
-    //          ik= i%2;
-    //          dummy1= (ik+i)*(ik+i);
-    //      }
-    
-    /* read data as characters (28941) */
-    usleep(1000);   // wait fior a while
-    count = 0;
-    counta= 0;
-    ichip_c = 7; // set ichip_c to stay away from any other command in the
-    dummy1 =0;
-    while (fread(&charchannel,sizeof(char),1,inpf)==1) {
-      carray[count] = charchannel;
-      count++;
-      counta++;
-      if((count%(nsend*2)) == 0) {
-	//        printf(" loop = %d\n",dummy1);
-	buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
-	send_array[0] =buf_send[0];
-	if(dummy1 <= 5 ) printf(" counta = %d, first word = %x, %x, %x %x %x \n",counta,buf_send[0], carray[0], carray[1]
-				,carray[2], carray[3]);
-	for (ij=0; ij< nsend; ij++) {
-	  if(ij== (nsend-1)) buf_send[ij+1] = carray[2*ij+1]+(0x0<<16);
-	  else buf_send[ij+1] = carray[2*ij+1]+ (carray[2*ij+2]<<16);
-	  //         buf_send[ij+1] = carray[2*ij+1]+ (carray[2*ij+2]<<16);
-	  send_array[ij+1] = buf_send[ij+1];
-	}
-	nword =nsend+1;
-	i=1;
-	//       if(dummy1 == 0)
-	ij = pcie_send(hDev, i, nword, px);
-	nanosleep(&tim , &tim2);
-	dummy1 = dummy1+1;
-	count =0;
-      }
-    }
-    if(feof(inpf)) {
-      printf("You have reached the end-of-file word count= %d %d\n", counta, count);
-      buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
-      if ( count > 1) {
-	if( ((count-1)%2) ==0) {
-	  ik =(count-1)/2;
-	}
-	else {
-	  ik =(count-1)/2+1;
-	}
-	ik=ik+2;   // add one more for safety
-	printf("ik= %d\n",ik);
-	for (ij=0; ij<ik; ij++){
-	  if(ij == (ik-1)) buf_send[ij+1] = carray[(2*ij)+1]+(((imod<<11)+(ichip<<8)+0x0)<<16);
-	  else buf_send[ij+1] = carray[(2*ij)+1]+ (carray[(2*ij)+2]<<16);
-	  send_array[ij+1] = buf_send[ij+1];
-	}
-      }
-      else ik=1;
-      
-      for (ij=ik-10; ij< ik+1; ij++) {
-	printf("Last data = %d, %x\n",ij,buf_send[ij]);
-      }
-      
-      nword =ik+1;
-      i=1;
-      i = pcie_send(hDev, i, nword, px);
-     }
-    usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
-    fclose(inpf);
-    //printf(" finish boot xmit_fake type 1 for continue \n");
-    //scanf("%d",&i);
-    printf("\n\tFinished fake XMIT booting...\n");
-//
-//
-//
-
-    char outFileName[256];
-    sprintf(outFileName, "%s_input_XMIT_fake_data.txt", outDate);
-    FILE *outFile = fopen(outFileName, "w");
-
-    printf("\n\tGenerating fake data for XMIT...\n");
-    imod = imod_xmit;
-    ichip =3;
-    for (ik=0; ik<64; ik++) {
-      for (ia=0; ia<1024; ia++) {
-	//
-	//        fake data increment linearly with channel number as base
-	//
-	fake_data_array[ik+ia*64]= (ik+ia) & 0xfff;
-	//
-	//        fake data == channel number
-	//
-	// fake_data_array[ik+ia*64]= (ik) & 0xfff;
-	//
-	//        fake data == sequence number
-	//
-	//       fake_data_array[ik+ia*64]= (ia) & 0xfff;
-	
-	if(ia == 0) fprintf(outFile,"\nChannel %i fake data\n", ik);
-	fprintf(outFile, "\t%4i", fake_data_array[ik+ia*64]);
-	if( ((ia+1)%64) == 0 ) fprintf(outFile,"\n");
-      }
-    }
-
-    fclose(outFile);
-    printf("\nWritten XMIT fake data pattern into file %s\n\n", outFileName);
-
-    // Fake data for ADC must be 12 bit long but fake XMIT is able to store 16 bit
-    // Store 4 12-bit ADC words as 3 16-bit XMIT words
-    // 64 channels * 1024 samples * 12 bit/16 bit = 49152
-    for(ik=0; ik< 49152; ik++) {
-      ia=ik/3;
-      if((ik%3) ==0) fake_array_pack[ik] = fake_data_array[ia*4] + ((fake_data_array[(ia*4)+1] & 0xf) <<12);
-      if((ik%3) ==1) fake_array_pack[ik] = ((fake_data_array[(ia*4)+1]>>4) & 0xff) + ((fake_data_array[(ia*4)+2] & 0xff) <<8);
-      if((ik%3) ==2) fake_array_pack[ik] = ((fake_data_array[(ia*4)+2]>>8) & 0xf) + ((fake_data_array[(ia*4)+3] & 0xfff) <<4);
-    }
-
-    printf("\n\tLoad fake data to XMIT...\n");
-    //scanf("%d", &aux);
-    for(ik=0; ik<4; ik++){
-      buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_block)+((ik & 0xffff)<<16); //write data
+    //#if 0
+    printf("\nEnter 1 to use modified XMIT as fake data generator\n");
+    scanf("%d", &aux);
+    if( aux == 1 ){
+      //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      // Beginning of fake XMIT block
+      //
+      // Boot fake XMIT
+      //
+      printf("\n\tBeginning of fake XMIT booting...\n");
+      //scanf("%d", &aux);
+      usleep(10000); // wait for 10ms
+      inpf = fopen("/home/sbnd/fpga/xmit_fpga_fake","r");
+      imod=imod_xmit;
+      ichip=mb_xmit_conf_add;
+      buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
       i=1;
       k=1;
       i = pcie_send(hDev, i, k, px);
-      usleep(1);
-      for(ijk=0; ijk<49152; ijk++){
-	buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_w_addr)+(((ijk) & 0xffff)<<16); //write address
-	i=1;
-	k=1;
-	i = pcie_send(hDev, i, k, px);
-	usleep(1);
-	//       buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_w_dat)+(((ijk+1) & 0xffff)<<16); //write data
-	buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_w_dat)+((fake_array_pack[ijk] & 0xffff)<<16); //write data
-	i=1;
-	k=1;
-	i = pcie_send(hDev, i, k, px);
-	usleep(1);
-	buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_write)+((ijk & 0xffff)<<16); //send write pulse
-	i=1;
-	k=1;
-	i = pcie_send(hDev, i, k, px);
-	usleep(1);
-	//        printf(" type 1 for continue \n");
-	//        scanf("%d",&i);
-	i= ijk%5000;
-	if(i==0) printf(" ik= %d,loop %d\n",ik,ijk);
+      //      for (i=0; i<100000; i++) {
+      //          ik= i%2;
+      //          dummy1= (ik+i)*(ik+i);
+      //      }
+      
+      /* read data as characters (28941) */
+      usleep(1000);   // wait fior a while
+      count = 0;
+      counta= 0;
+      ichip_c = 7; // set ichip_c to stay away from any other command in the
+      dummy1 =0;
+      while (fread(&charchannel,sizeof(char),1,inpf)==1) {
+	carray[count] = charchannel;
+	count++;
+	counta++;
+	if((count%(nsend*2)) == 0) {
+	  //        printf(" loop = %d\n",dummy1);
+	  buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
+	  send_array[0] =buf_send[0];
+	  if(dummy1 <= 5 ) printf(" counta = %d, first word = %x, %x, %x %x %x \n",counta,buf_send[0], carray[0], carray[1]
+				  ,carray[2], carray[3]);
+	  for (ij=0; ij< nsend; ij++) {
+	    if(ij== (nsend-1)) buf_send[ij+1] = carray[2*ij+1]+(0x0<<16);
+	    else buf_send[ij+1] = carray[2*ij+1]+ (carray[2*ij+2]<<16);
+	    //         buf_send[ij+1] = carray[2*ij+1]+ (carray[2*ij+2]<<16);
+	    send_array[ij+1] = buf_send[ij+1];
+	  }
+	  nword =nsend+1;
+	  i=1;
+	  //       if(dummy1 == 0)
+	  ij = pcie_send(hDev, i, nword, px);
+	  nanosleep(&tim , &tim2);
+	  dummy1 = dummy1+1;
+	  count =0;
+	}
       }
+      if(feof(inpf)) {
+	printf("You have reached the end-of-file word count= %d %d\n", counta, count);
+	buf_send[0] = (imod <<11) +(ichip_c <<8)+ (carray[0]<<16);
+	if ( count > 1) {
+	  if( ((count-1)%2) ==0) {
+	    ik =(count-1)/2;
+	  }
+	  else {
+	    ik =(count-1)/2+1;
+	  }
+	  ik=ik+2;   // add one more for safety
+	  printf("ik= %d\n",ik);
+	  for (ij=0; ij<ik; ij++){
+	    if(ij == (ik-1)) buf_send[ij+1] = carray[(2*ij)+1]+(((imod<<11)+(ichip<<8)+0x0)<<16);
+	    else buf_send[ij+1] = carray[(2*ij)+1]+ (carray[(2*ij)+2]<<16);
+	    send_array[ij+1] = buf_send[ij+1];
+	  }
+	}
+	else ik=1;
+	
+	for (ij=ik-10; ij< ik+1; ij++) {
+	  printf("Last data = %d, %x\n",ij,buf_send[ij]);
+	}
+	
+	nword =ik+1;
+	i=1;
+	i = pcie_send(hDev, i, nword, px);
+      }
+      usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
+      fclose(inpf);
+      //printf(" finish boot xmit_fake type 1 for continue \n");
+      //scanf("%d",&i);
+      printf("\n\tFinished fake XMIT booting...\n");
+      //
+      //
+      //
+      
+      char outFileName[256];
+      sprintf(outFileName, "%s_input_XMIT_fake_data.txt", outDate);
+      FILE *outFile = fopen(outFileName, "w");
+      
+      printf("\n\tGenerating fake data for XMIT...\n");
+      imod = imod_xmit;
+      ichip =3;
+      for (ik=0; ik<64; ik++) {
+	for (ia=0; ia<1024; ia++) {
+	  //
+	  //        fake data increment linearly with channel number as base
+	  //
+	  //fake_data_array[ik+ia*64]= (ik+ia) & 0xfff;
+	  //
+	  //        fake data == channel number
+	  //
+	  // fake_data_array[ik+ia*64]= (ik) & 0xfff;
+	  //
+	  //        fake data == sequence number
+	  //
+	  //       fake_data_array[ik+ia*64]= (ia) & 0xfff;
+	  //
+	  // Fixed fake data
+	  fake_data_array[ik+ia*64]= (291) & 0xfff;
+	  
+	  if(ia == 0) fprintf(outFile,"\nChannel %i fake data\n", ik);
+	  fprintf(outFile, "\t%4i", fake_data_array[ik+ia*64]);
+	  if( ((ia+1)%64) == 0 ) fprintf(outFile,"\n");
+	}
+      }
+      
+      fclose(outFile);
+      printf("\nWritten XMIT fake data pattern into file %s\n\n", outFileName);
+      
+      // Fake data for ADC must be 12 bit long but fake XMIT is able to store 16 bit
+      // Store 4 12-bit ADC words as 3 16-bit XMIT words
+      // 64 channels * 1024 samples * 12 bit/16 bit = 49152
+      for(ik=0; ik< 49152; ik++) {
+	ia=ik/3;
+	if((ik%3) ==0) fake_array_pack[ik] = fake_data_array[ia*4] + ((fake_data_array[(ia*4)+1] & 0xf) <<12);
+	if((ik%3) ==1) fake_array_pack[ik] = ((fake_data_array[(ia*4)+1]>>4) & 0xff) + ((fake_data_array[(ia*4)+2] & 0xff) <<8);
+	if((ik%3) ==2) fake_array_pack[ik] = ((fake_data_array[(ia*4)+2]>>8) & 0xf) + ((fake_data_array[(ia*4)+3] & 0xfff) <<4);
+      }
+      
+      printf("\n\tLoad fake data to XMIT...\n");
+      //scanf("%d", &aux);
+      for(ik=0; ik<4; ik++){
+	buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_block)+((ik & 0xffff)<<16); //write data
+	i=1;
+	k=1;
+	i = pcie_send(hDev, i, k, px);
+	usleep(1);
+	for(ijk=0; ijk<49152; ijk++){
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_w_addr)+(((ijk) & 0xffff)<<16); //write address
+	  i=1;
+	  k=1;
+	  i = pcie_send(hDev, i, k, px);
+	  usleep(1);
+	  //       buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_w_dat)+(((ijk+1) & 0xffff)<<16); //write data
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_w_dat)+((fake_array_pack[ijk] & 0xffff)<<16); //write data
+	  i=1;
+	  k=1;
+	  i = pcie_send(hDev, i, k, px);
+	  usleep(1);
+	  buf_send[0]=(imod<<11)+(ichip<<8)+(xmit_fake_sram_write)+((ijk & 0xffff)<<16); //send write pulse
+	  i=1;
+	  k=1;
+	  i = pcie_send(hDev, i, k, px);
+	  usleep(1);
+	  //        printf(" type 1 for continue \n");
+	  //        scanf("%d",&i);
+	  i= ijk%5000;
+	  if(i==0) printf(" ik= %d,loop %d\n",ik,ijk);
+	}
+      }
+      printf(" finish loading test pattern, type 1 for continue \n");
+      scanf("%d",&i);
+      printf("\n\tFinished loading fake data to XMIT...\n");    
+      // End of fake XMIT block
+      //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     }
-    //printf(" finish loading test pattern, type 1 for continue \n");
-    //scanf("%d",&i);
-    printf("\n\tFinished loading fake data to XMIT...\n");    
-    // End of fake XMIT block
-    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    //#endif
 
     //
     // Boot FEM
@@ -1133,8 +1142,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
       }
       usleep(2000);    // wait for 2ms to cover the packet time plus fpga init time
       fclose(inpf);
-      //printf(" enter 1 to reset the dram \n");
-      //scanf("%d",&ik);
+      printf(" enter 1 to reset the dram \n");
+      scanf("%d",&ik);
       ik =1;
       printf("\n\tResetting the DRAM...\n");
       if(ik ==1) {
