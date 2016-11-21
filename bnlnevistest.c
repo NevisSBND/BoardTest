@@ -741,14 +741,21 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     printf("\nNumber of loops: %d\n", nloop);
     //     printf(" frame length \n");
     //     scanf("%d",&iframe_length);
-    iframe_length = 2048;
+    iframe_length = 20480; // 1.28 ms (SBND drift time) * 16 MHz (Nevis clock)
+    //iframe_length = 2048;
     printf("\nFrame length: %d\n", iframe_length);
     ik=iframe_length%64;
     if(ik != 0) printf(" frame_length problem \n");
 
     printf(" drift time (< %d) \n", iframe_length/8);
     //     scanf("%d",&idrift_time);
-    idrift_time = 256;
+    //idrift_time = 2559; // slow read cannot cope with this
+    //idrift_time = 1279; // slow read cannot cope with this
+    //idrift_time = 639; // slow read cannot cope with this
+    //idrift_time = 559; // slow read cannot cope with this
+    //idrift_time = 479; // slow read cannot cope with this
+    idrift_time = 319; // slow read can cope with this
+    //idrift_time = 256;
     printf("\nDrift time: %d\n", idrift_time);
     printf(" enter triger delay \n");
     //     scanf("%d",&itrig_delay);
@@ -781,7 +788,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     else iprint =0;
     printf(" number event \n");
     //     scanf("%d",&nevent);
-    nevent = 100;
+    nevent = 10000;
     printf("\nNumber of events: %d\n", nevent);   
 
     //     printf(" enter number of words per packet \n");
@@ -978,18 +985,18 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
 	  //
 	  //        fake data increment linearly with channel number as base
 	  //
-	  //fake_data_array[ik+ia*64]= (ik+ia) & 0xfff;
+	  //	  fake_data_array[ik+ia*64]= (ik+ia) & 0xfff;
 	  //
 	  //        fake data == channel number
 	  //
-	  // fake_data_array[ik+ia*64]= (ik) & 0xfff;
+	  fake_data_array[ik+ia*64]= (ik) & 0xfff;
 	  //
 	  //        fake data == sequence number
 	  //
 	  //       fake_data_array[ik+ia*64]= (ia) & 0xfff;
 	  //
 	  // Fixed fake data
-	  fake_data_array[ik+ia*64]= (291) & 0xfff;
+	  //fake_data_array[ik+ia*64]= (291) & 0xfff;
 	  
 	  if(ia == 0) fprintf(outFile,"\nChannel %i fake data\n", ik);
 	  fprintf(outFile, "\t%4i", fake_data_array[ik+ia*64]);
@@ -1236,6 +1243,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
       */
       
       //Set number of ADC samples to (iframe+1)/8; eg, 1024 gives 128 adc samples per frame
+      // The factor 1/8 relates the number of ticks of a 16 MHz clock to the number of ADC samples obtained sampling at 2 MHz
       imod=imod_trig;
       //iframe= 1023;    //1023
       iframe= iframe_length - 1;
