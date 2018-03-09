@@ -893,7 +893,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
       printf("\n\tBeginning of fake XMIT booting...\n");
       //scanf("%d", &aux);
       usleep(10000); // wait for 10ms
-      inpf = fopen("/home/sbnd/fpga/xmit_fpga_fake","r");
+      inpf = fopen("/home/jcrespo/fpga/xmit_fpga_fake","r");
       imod=imod_xmit;
       ichip=mb_xmit_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on
@@ -1075,7 +1075,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
       printf("\n\tBeginning of FEM FPGA configuration...\n");
       //scanf("%d", &aux);
       usleep(10000); // wait for 10ms
-      inpf = fopen("/home/sbnd/fpga/feb_fpga_lar1nd","r");
+      inpf = fopen("/home/jcrespo/fpga/feb_fpga_lar1nd","r");
       imod=imod_fem;
       ichip=mb_feb_conf_add;
       buf_send[0]=(imod<<11)+(ichip<<8)+0x0+(0x0<<16);  // turn conf to be on

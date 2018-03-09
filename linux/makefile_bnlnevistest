@@ -54,7 +54,7 @@ endif
 CFLAGS += -DLINUX $(DEBFLAGS) -w -I$(WD_BASEDIR)/include -I$(WD_BASEDIR)
 #CFLAGS += -DLINUX $(DEBFLAGS) -Wall -I$(WD_BASEDIR)/include -I$(WD_BASEDIR)
 CFLAGS += -DWD_DRIVER_NAME_CHANGE
-LFLAGS += -lwdapi1021
+LFLAGS += -lwdapi1100
 # need also thread support for interrupt handling
 LFLAGS += -lpthread
 
