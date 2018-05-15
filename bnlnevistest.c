@@ -755,6 +755,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     //idrift_time = 559; // slow read cannot cope with this
     //idrift_time = 479; // slow read cannot cope with this
     idrift_time = 319; // slow read can cope with this
+    // Is the drift time limited by the fake XMIT waveform length (1024 ticks = 3 drifts x 341 samples/drift)?
     //idrift_time = 256;
     printf("\nDrift time: %d\n", idrift_time);
     printf(" enter triger delay \n");
@@ -772,8 +773,10 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     //     scanf("%d",&irand);
     icheck=0;
     irand=0;
-    imod_fem = 9;
-    printf("\nFEM module crate location: %i\n\n", imod_fem);
+    //    imod_fem = 9;
+    //    printf("\nFEM module crate location: %i\n\n", imod_fem);
+    printf("\nEnter FEM module crate location (slots 4 - 12):\n");
+    scanf("%d",&imod_fem);
     imod_xmit = 1;
     printf("\nFake XMIT module crate location: %i\n\n", imod_xmit);
     imod_trig = 15;
@@ -788,7 +791,8 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     else iprint =0;
     printf(" number event \n");
     //     scanf("%d",&nevent);
-    nevent = 10000;
+    //nevent = 10000;
+    nevent = 200;
     printf("\nNumber of events: %d\n", nevent);   
 
     //     printf(" enter number of words per packet \n");
@@ -884,6 +888,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     //#if 0
     printf("\nEnter 1 to use modified XMIT as fake data generator\n");
     scanf("%d", &aux);
+    //aux = 1;
     if( aux == 1 ){
       //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
       // Beginning of fake XMIT block
@@ -1073,6 +1078,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     for(j=0; j<nloop; j++){
 
       printf("\n\tBeginning of FEM FPGA configuration...\n");
+      //printf("Enter any number\n");
       //scanf("%d", &aux);
       usleep(10000); // wait for 10ms
       inpf = fopen("/home/jcrespo/fpga/feb_fpga_lar1nd","r");
@@ -1339,7 +1345,7 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
       //scanf("%d",&ik);
 
       char outBinFileName[256];
-      sprintf(outBinFileName, "%s_output.dat", outDate);
+      sprintf(outBinFileName, "%s_output_FEMSlot%d.dat", outDate, imod_fem);
       FILE* outBinFile = creat(outBinFileName,0755);
       
       for(is=0; is<nevent; is++){
