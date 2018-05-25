@@ -1,0 +1,7 @@
+To run bnlnevistest
+
+Go to the linux directory and make
+make -f makefile_bnlnevistest
+
+Run ./bnlnevistest
+At sbndelec01.nevis.columbia.edu, the PCIe card connected to the controller is in bus 0x3

@@ -171,14 +171,14 @@ int main(void)
   /* Find and open a PCIE device (by default ID) */
   if (PCIE_DEFAULT_VENDOR_ID)
     hDev = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID);
-  if (PCIE_DEFAULT_VENDOR_ID)
-    hDev1 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+1);
-  if (PCIE_DEFAULT_VENDOR_ID)
-    hDev2 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+2);
-  
+  /* if (PCIE_DEFAULT_VENDOR_ID) */
+  /*   hDev1 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+1); */
+  /* if (PCIE_DEFAULT_VENDOR_ID) */
+  /*   hDev2 = DeviceFindAndOpen(PCIE_DEFAULT_VENDOR_ID, PCIE_DEFAULT_DEVICE_ID+2); */
+ 
   // Go directly to mbtest
   MenuMBtest(hDev, hDev2);
-  
+    
   /* Perform necessary cleanup before exiting the program */
   if (hDev)
     DeviceClose(hDev);
@@ -775,11 +775,11 @@ static void MenuMBtest(WDC_DEVICE_HANDLE hDev, WDC_DEVICE_HANDLE hDev2)
     irand=0;
     //    imod_fem = 9;
     //    printf("\nFEM module crate location: %i\n\n", imod_fem);
-    printf("\nEnter FEM module crate location (slots 4 - 12):\n");
+    printf("\nEnter FEM module crate location (slots 4 - 14):\n");
     scanf("%d",&imod_fem);
     imod_xmit = 1;
     printf("\nFake XMIT module crate location: %i\n\n", imod_xmit);
-    imod_trig = 15;
+    imod_trig = 18;
     printf("\nTrigger module crate location: %i\n\n", imod_trig);
     
     if(icheck != 1) {
