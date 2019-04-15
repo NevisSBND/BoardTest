@@ -12,8 +12,8 @@
 *************************************************************************/
 
 #include "wdc_lib.h"
-#include "samples/shared/pci_regs.h"
-#include "samples/shared/bits.h"
+#include "include/pci_regs.h"
+#include "include/bits.h"
 
 #ifdef __cplusplus
 extern "C" {

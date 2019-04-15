@@ -18,7 +18,7 @@
 #include "status_strings.h"
 #include "samples/shared/diag_lib.h"
 #include "samples/shared/wdc_diag_lib.h"
-#include "samples/shared/pci_regs.h"
+#include "include/pci_regs.h"
 #include "pcie_lib.h"
 
 /*************************************************************
@@ -102,12 +102,12 @@ static void SetAddrSpace(WDC_DEVICE_HANDLE hDev, PDWORD pdwAddrSpace);
 /* -----------------------------------------------
     Read/write the configuration space
    ----------------------------------------------- */
-static void MenuReadWriteCfgSpace(WDC_DEVICE_HANDLE hDev);
+//static void MenuReadWriteCfgSpace(WDC_DEVICE_HANDLE hDev);
 
 /* -----------------------------------------------
     Read/write the run-time registers
    ----------------------------------------------- */
-static void MenuReadWriteRegs(WDC_DEVICE_HANDLE hDev);
+//static void MenuReadWriteRegs(WDC_DEVICE_HANDLE hDev);
 
 /* -----------------------------------------------
     Interrupt handling
@@ -3196,65 +3196,65 @@ enum {
 };
 
 /* Display read/write configuration space menu */
-static void MenuReadWriteCfgSpace(WDC_DEVICE_HANDLE hDev)
-{
-    DWORD option;
+/* static void MenuReadWriteCfgSpace(WDC_DEVICE_HANDLE hDev) */
+/* { */
+/*     DWORD option; */
   
-    do {
-        /* Display pre-defined registers' information */
-        if (PCIE_CFG_REGS_NUM)
-        {
-            printf("\n");
-            printf("Configuration registers:\n");
-            printf("------------------------\n");
-            WDC_DIAG_RegsInfoPrint(gpPCIE_CfgRegs, PCIE_CFG_REGS_NUM,
-                WDC_DIAG_REG_PRINT_ALL & ~WDC_DIAG_REG_PRINT_ADDR_SPACE);
-        }
+/*     do { */
+/*         /\* Display pre-defined registers' information *\/ */
+/*         if (PCIE_CFG_REGS_NUM) */
+/*         { */
+/*             printf("\n"); */
+/*             printf("Configuration registers:\n"); */
+/*             printf("------------------------\n"); */
+/*             WDC_DIAG_RegsInfoPrint(gpPCIE_CfgRegs, PCIE_CFG_REGS_NUM, */
+/*                 WDC_DIAG_REG_PRINT_ALL & ~WDC_DIAG_REG_PRINT_ADDR_SPACE); */
+/*         } */
 
-        printf("\n");
-        printf("Read/write the device's configuration space\n");
-        printf("--------------------------------------------\n");
-        printf("%d. Read from an offset\n", MENU_RW_CFG_SPACE_READ_OFFSET);
-        printf("%d. Write to an offset\n", MENU_RW_CFG_SPACE_WRITE_OFFSET);
-        if (PCIE_CFG_REGS_NUM)
-        {
-            printf("%d. Read all configuration registers defined for the device (see list above)\n",
-                MENU_RW_CFG_SPACE_READ_ALL_REGS);
-            printf("%d. Read from a named register\n", MENU_RW_CFG_SPACE_READ_REG);
-            printf("%d. Write to a named register\n", MENU_RW_CFG_SPACE_WRITE_REG);
-        }
-        printf("%d. Exit menu\n", MENU_RW_CFG_SPACE_EXIT);
-        printf("\n");
+/*         printf("\n"); */
+/*         printf("Read/write the device's configuration space\n"); */
+/*         printf("--------------------------------------------\n"); */
+/*         printf("%d. Read from an offset\n", MENU_RW_CFG_SPACE_READ_OFFSET); */
+/*         printf("%d. Write to an offset\n", MENU_RW_CFG_SPACE_WRITE_OFFSET); */
+/*         if (PCIE_CFG_REGS_NUM) */
+/*         { */
+/*             printf("%d. Read all configuration registers defined for the device (see list above)\n", */
+/*                 MENU_RW_CFG_SPACE_READ_ALL_REGS); */
+/*             printf("%d. Read from a named register\n", MENU_RW_CFG_SPACE_READ_REG); */
+/*             printf("%d. Write to a named register\n", MENU_RW_CFG_SPACE_WRITE_REG); */
+/*         } */
+/*         printf("%d. Exit menu\n", MENU_RW_CFG_SPACE_EXIT); */
+/*         printf("\n"); */
 
-        if (DIAG_INPUT_FAIL == DIAG_GetMenuOption(&option,
-            PCIE_CFG_REGS_NUM ? MENU_RW_CFG_SPACE_WRITE_REG :
-            MENU_RW_CFG_SPACE_WRITE_OFFSET))
-        {
-            continue;
-        }
+/*         if (DIAG_INPUT_FAIL == DIAG_GetMenuOption(&option, */
+/*             PCIE_CFG_REGS_NUM ? MENU_RW_CFG_SPACE_WRITE_REG : */
+/*             MENU_RW_CFG_SPACE_WRITE_OFFSET)) */
+/*         { */
+/*             continue; */
+/*         } */
 
-        switch (option)
-        {
-        case MENU_RW_CFG_SPACE_EXIT: /* Exit menu */
-            break;
-        case MENU_RW_CFG_SPACE_READ_OFFSET: /* Read from a configuration space offset */
-            WDC_DIAG_ReadWriteBlock(hDev, WDC_READ, WDC_AD_CFG_SPACE);
-            break;
-        case MENU_RW_CFG_SPACE_WRITE_OFFSET: /* Write to a configuration space offset */
-            WDC_DIAG_ReadWriteBlock(hDev, WDC_WRITE, WDC_AD_CFG_SPACE);
-            break;
-        case MENU_RW_CFG_SPACE_READ_ALL_REGS:
-            WDC_DIAG_ReadRegsAll(hDev, gpPCIE_CfgRegs, PCIE_CFG_REGS_NUM, TRUE);
-            break;
-        case MENU_RW_CFG_SPACE_READ_REG:  /* Read from a configuration register */
-            WDC_DIAG_ReadWriteReg(hDev, gpPCIE_CfgRegs, PCIE_CFG_REGS_NUM, WDC_READ, TRUE);
-            break;
-        case MENU_RW_CFG_SPACE_WRITE_REG: /* Write to a configuration register */
-            WDC_DIAG_ReadWriteReg(hDev, gpPCIE_CfgRegs, PCIE_CFG_REGS_NUM, WDC_WRITE, TRUE);
-            break;
-        }
-    } while (MENU_RW_CFG_SPACE_EXIT != option);
-}
+/*         switch (option) */
+/*         { */
+/*         case MENU_RW_CFG_SPACE_EXIT: /\* Exit menu *\/ */
+/*             break; */
+/*         case MENU_RW_CFG_SPACE_READ_OFFSET: /\* Read from a configuration space offset *\/ */
+/*             WDC_DIAG_ReadWriteBlock(hDev, WDC_READ, WDC_AD_CFG_SPACE); */
+/*             break; */
+/*         case MENU_RW_CFG_SPACE_WRITE_OFFSET: /\* Write to a configuration space offset *\/ */
+/*             WDC_DIAG_ReadWriteBlock(hDev, WDC_WRITE, WDC_AD_CFG_SPACE); */
+/*             break; */
+/*         case MENU_RW_CFG_SPACE_READ_ALL_REGS: */
+/*             WDC_DIAG_ReadRegsAll(hDev, gpPCIE_CfgRegs, PCIE_CFG_REGS_NUM, TRUE); */
+/*             break; */
+/*         case MENU_RW_CFG_SPACE_READ_REG:  /\* Read from a configuration register *\/ */
+/*             WDC_DIAG_ReadWriteReg(hDev, gpPCIE_CfgRegs, PCIE_CFG_REGS_NUM, WDC_READ, TRUE); */
+/*             break; */
+/*         case MENU_RW_CFG_SPACE_WRITE_REG: /\* Write to a configuration register *\/ */
+/*             WDC_DIAG_ReadWriteReg(hDev, gpPCIE_CfgRegs, PCIE_CFG_REGS_NUM, WDC_WRITE, TRUE); */
+/*             break; */
+/*         } */
+/*     } while (MENU_RW_CFG_SPACE_EXIT != option); */
+/* } */
 
 /* -----------------------------------------------
     Read/write the run-time registers
@@ -3268,55 +3268,55 @@ enum {
 };
 
 /* Display read/write run-time registers menu */
-static void MenuReadWriteRegs(WDC_DEVICE_HANDLE hDev)
-{
-    DWORD option;
+/* static void MenuReadWriteRegs(WDC_DEVICE_HANDLE hDev) */
+/* { */
+/*     DWORD option; */
     
-    if (!PCIE_REGS_NUM)
-    {
-        printf("There are currently no pre-defined run-time registers\n");
-        return;
-    }
+/*     if (!PCIE_REGS_NUM) */
+/*     { */
+/*         printf("There are currently no pre-defined run-time registers\n"); */
+/*         return; */
+/*     } */
   
-    do {
-        /* Display pre-defined registers' information */
-        printf("\n");
-        printf("PCIE run-time registers:\n");
-        printf("--------------------------\n");   
-        WDC_DIAG_RegsInfoPrint(gpPCIE_Regs, PCIE_REGS_NUM, WDC_DIAG_REG_PRINT_ALL);
+/*     do { */
+/*         /\* Display pre-defined registers' information *\/ */
+/*         printf("\n"); */
+/*         printf("PCIE run-time registers:\n"); */
+/*         printf("--------------------------\n");    */
+/*         WDC_DIAG_RegsInfoPrint(gpPCIE_Regs, PCIE_REGS_NUM, WDC_DIAG_REG_PRINT_ALL); */
 
-        printf("\n");
-        printf("Read/write the PCIE run-time registers\n");
-        printf("-----------------------------------------\n");
-        printf("%d. Read all run-time registers defined for the device (see list above)\n",
-            MENU_RW_REGS_READ_ALL);
-        printf("%d. Read from a specific register\n", MENU_RW_REGS_READ_REG);
-        printf("%d. Write to a specific register\n", MENU_RW_REGS_WRITE_REG);
-        printf("%d. Exit menu\n", MENU_RW_REGS_EXIT);
-        printf("\n");
+/*         printf("\n"); */
+/*         printf("Read/write the PCIE run-time registers\n"); */
+/*         printf("-----------------------------------------\n"); */
+/*         printf("%d. Read all run-time registers defined for the device (see list above)\n", */
+/*             MENU_RW_REGS_READ_ALL); */
+/*         printf("%d. Read from a specific register\n", MENU_RW_REGS_READ_REG); */
+/*         printf("%d. Write to a specific register\n", MENU_RW_REGS_WRITE_REG); */
+/*         printf("%d. Exit menu\n", MENU_RW_REGS_EXIT); */
+/*         printf("\n"); */
 
-        if (DIAG_INPUT_FAIL == DIAG_GetMenuOption(&option,
-            MENU_RW_REGS_WRITE_REG))
-        {
-            continue;
-        }
+/*         if (DIAG_INPUT_FAIL == DIAG_GetMenuOption(&option, */
+/*             MENU_RW_REGS_WRITE_REG)) */
+/*         { */
+/*             continue; */
+/*         } */
 
-        switch (option)
-        {
-        case MENU_RW_REGS_EXIT: /* Exit menu */
-            break;
-        case MENU_RW_REGS_READ_ALL:
-            WDC_DIAG_ReadRegsAll(hDev, gpPCIE_Regs, PCIE_REGS_NUM, FALSE);
-            break;
-        case MENU_RW_REGS_READ_REG:  /* Read from a register */
-            WDC_DIAG_ReadWriteReg(hDev, gpPCIE_Regs, PCIE_REGS_NUM, WDC_READ, FALSE);
-            break;
-        case MENU_RW_REGS_WRITE_REG: /* Write to a register */
-            WDC_DIAG_ReadWriteReg(hDev, gpPCIE_Regs, PCIE_REGS_NUM, WDC_WRITE, FALSE);
-            break;
-        }
-    } while (MENU_RW_REGS_EXIT != option);
-}
+/*         switch (option) */
+/*         { */
+/*         case MENU_RW_REGS_EXIT: /\* Exit menu *\/ */
+/*             break; */
+/*         case MENU_RW_REGS_READ_ALL: */
+/*             WDC_DIAG_ReadRegsAll(hDev, gpPCIE_Regs, PCIE_REGS_NUM, FALSE); */
+/*             break; */
+/*         case MENU_RW_REGS_READ_REG:  /\* Read from a register *\/ */
+/*             WDC_DIAG_ReadWriteReg(hDev, gpPCIE_Regs, PCIE_REGS_NUM, WDC_READ, FALSE); */
+/*             break; */
+/*         case MENU_RW_REGS_WRITE_REG: /\* Write to a register *\/ */
+/*             WDC_DIAG_ReadWriteReg(hDev, gpPCIE_Regs, PCIE_REGS_NUM, WDC_WRITE, FALSE); */
+/*             break; */
+/*         } */
+/*     } while (MENU_RW_REGS_EXIT != option); */
+/* } */
 
 /* -----------------------------------------------
     Interrupt handling
