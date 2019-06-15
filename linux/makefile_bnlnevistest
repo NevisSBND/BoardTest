@@ -5,7 +5,7 @@
 
 # Make sure that WD_BASEDIR points to the right place
 ifeq ($(WD_BASEDIR),)
-        WD_BASEDIR=/home/nfs/sbnd/WinDriver/
+        WD_BASEDIR=$(WINDRIVER_DIR)
 endif
 
 WD_BASEDIR:=$(wildcard $(WD_BASEDIR))
@@ -51,15 +51,15 @@ ifeq ("$(TARGET_CPU)", "x86_64")
 endif
 
 # Inhibit all warning messages
-CFLAGS += -DLINUX $(DEBFLAGS) -w -I$(WD_BASEDIR)/include -I$(WD_BASEDIR)
 #CFLAGS += -DLINUX $(DEBFLAGS) -Wall -I$(WD_BASEDIR)/include -I$(WD_BASEDIR)
+CFLAGS += -DLINUX $(DEBFLAGS) -w -I$(WD_BASEDIR)/include -I$(WD_BASEDIR)
 CFLAGS += -DWD_DRIVER_NAME_CHANGE
-LFLAGS += -lwdapi1100
+LFLAGS += -lwdapi1260
 # need also thread support for interrupt handling
 LFLAGS += -lpthread
 
 TARGET = bnlnevistest
-SRCS = ../$(TARGET).c ../pcie_lib.c $(WD_BASEDIR)/samples/shared/diag_lib.c $(WD_BASEDIR)/samples/shared/wdc_diag_lib.c
+SRCS = ../bnlnevistest.c ../nevispci_lib.c $(WD_BASEDIR)/source/WinDriver/samples/shared/diag_lib.c $(WD_BASEDIR)/source/WinDriver/samples/shared/wdc_diag_lib.c
 
 LD = gcc
 
@@ -72,16 +72,16 @@ all : $(TARGET)
 $(TARGET) : $(OBJS)
 	$(LD) $(LFLAGS) -o $@ $(OBJS) $(ADDITIONAL_LIBS) 
 
-$(TARGET).o : ../$(TARGET).c
+bnlnevistest.o : ../bnlnevistest.c
 	$(CC) -c $(CFLAGS) -o $@ $< 
 
-pcie_lib.o : ../pcie_lib.c
+nevispci_lib.o : ../nevispci_lib.c
 	$(CC) -c $(CFLAGS) -o $@ $< 
 
-diag_lib.o : $(WD_BASEDIR)/samples/shared/diag_lib.c
+diag_lib.o : $(WD_BASEDIR)/source/WinDriver/samples/shared/diag_lib.c
 	$(CC) -c $(CFLAGS) -o $@ $< 
 
-wdc_diag_lib.o : $(WD_BASEDIR)/samples/shared/wdc_diag_lib.c
+wdc_diag_lib.o : $(WD_BASEDIR)/source/WinDriver/samples/shared/wdc_diag_lib.c
 	$(CC) -c $(CFLAGS) -o $@ $< 
 
 
